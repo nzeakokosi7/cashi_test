@@ -5,7 +5,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -96,34 +95,6 @@ fun PaymentFormContent(
             )
         )
 
-        // Amount Field
-        OutlinedTextField(
-            value = amount,
-            onValueChange = {
-                // Only allow numbers and single decimal point
-                if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*$"))) {
-                    amount = it
-                }
-            },
-            label = { Text("Amount") },
-            placeholder = { Text("0.00") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.AttachMoney,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline
-            )
-        )
-
         // Currency Selection
         ExposedDropdownMenuBox(
             expanded = showCurrencyDropdown,
@@ -164,6 +135,36 @@ fun PaymentFormContent(
                 }
             }
         }
+
+        // Amount Field (with currency symbol prefix)
+        OutlinedTextField(
+            value = amount,
+            onValueChange = {
+                // Only allow numbers and single decimal point
+                if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*$"))) {
+                    amount = it
+                }
+            },
+            label = { Text("Amount") },
+            placeholder = { Text("0.00") },
+            leadingIcon = {
+                Text(
+                    text = selectedCurrency.symbol,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline
+            )
+        )
 
         // Error Message
         if (errorMessage != null) {
