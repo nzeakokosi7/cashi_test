@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    WARNING: This configuration allows HTTP clear text traffic for development purposes only.
+
+    This is UNSAFE for production and should NEVER be used in a real application.
+
+    For this coding challenge, we allow clear text to communicate with the local development
+    server running at http://10.0.2.2:8080 (Android emulator's localhost proxy).
+
+    In a production app:
+    - ALL traffic should use HTTPS
+    - Certificate pinning should be implemented
+    - Network security should be hardened
+-->
+<network-security-config>
+    <!-- Allow clear text traffic for development/demo purposes ONLY -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- For production, you would use domain-specific configuration like this:
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.production.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+        <pin-set>
+            <pin digest="SHA-256">base64EncodedPublicKey==</pin>
+        </pin-set>
+    </domain-config>
+    -->
+</network-security-config>
