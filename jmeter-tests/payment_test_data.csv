@@ -1,0 +1,11 @@
+recipientEmail,amount,currency
+alice@example.com,100.50,USD
+bob@test.com,250.75,EUR
+charlie@sample.org,500.00,USD
+diana@email.com,75.25,EUR
+eve@domain.com,1000.00,USD
+frank@test.org,150.50,EUR
+grace@example.net,300.00,USD
+henry@sample.com,450.75,EUR
+iris@email.org,200.00,USD
+jack@domain.net,350.25,EUR
