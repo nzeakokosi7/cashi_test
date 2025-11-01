@@ -1,5 +1,6 @@
 package com.test.cashi.data.api
 
+import com.test.cashi.BuildKonfig
 import com.test.cashi.domain.model.PaymentRequest
 import com.test.cashi.domain.model.PaymentResponse
 import io.ktor.client.*
@@ -14,13 +15,18 @@ import kotlinx.serialization.json.Json
 
 /**
  * API client for payment operations
+ *
+ * Uses environment-based configuration for base URL:
+ * - Development: http://10.0.2.2:8080 (Android emulator localhost)
+ * - Can be overridden via API_BASE_URL environment variable
+ *
  * Designed for testability:
  * - Can be easily mocked for BDD tests
  * - Configurable base URL for different environments
  * - Structured error handling
  */
 class PaymentApiClient(
-    private val baseUrl: String = "http://10.0.2.2:8080" // Android emulator localhost
+    private val baseUrl: String = BuildKonfig.API_BASE_URL
 ) {
     private val client = HttpClient {
         install(ContentNegotiation) {

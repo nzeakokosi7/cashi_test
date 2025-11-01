@@ -1,9 +1,20 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.buildkonfig)
+}
+
+// Load local.properties if it exists
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
 }
 
 kotlin {
@@ -76,5 +87,19 @@ android {
     }
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
+    }
+}
+
+buildkonfig {
+    packageName = "com.test.cashi"
+
+    // Default configuration (Development)
+    // Priority: local.properties > environment variable > default value
+    defaultConfigs {
+        val apiBaseUrl = localProperties.getProperty("api.base.url")
+            ?: System.getenv("API_BASE_URL")
+            ?: "http://10.0.2.2:8080"
+
+        buildConfigField(STRING, "API_BASE_URL", apiBaseUrl)
     }
 }

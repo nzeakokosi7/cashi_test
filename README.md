@@ -153,6 +153,54 @@ Before running the project, ensure you have:
    │   └── status: String
    ```
 
+### Environment Configuration
+
+The app uses `local.properties` for environment-specific configuration. This file is git-ignored for security.
+
+**1. Copy the example file**:
+```bash
+cp local.properties.example local.properties
+```
+
+**2. Configure the API base URL** based on your platform and device:
+
+```properties
+# For Android Emulator (default)
+api.base.url=http://10.0.2.2:8080
+
+# For physical Android device (use your machine's local IP)
+api.base.url=http://192.168.1.100:8080
+
+# For iOS Simulator
+api.base.url=http://localhost:8080
+
+# For physical iOS device (use your machine's local IP)
+api.base.url=http://192.168.1.100:8080
+```
+
+**Configuration Priority**:
+1. `local.properties` file (highest priority)
+2. `API_BASE_URL` environment variable
+3. Default value: `http://10.0.2.2:8080`
+
+**How it works across platforms**:
+- Uses **BuildKonfig** plugin to generate compile-time constants
+- At **build time**, Gradle reads `local.properties` and generates a `BuildKonfig.kt` file
+- The generated constant is compiled into the platform binary (Android APK, iOS Framework, JVM JAR)
+- Works across **all platforms** (Android, iOS, JVM) via Kotlin Multiplatform
+
+**Important Notes**:
+- **iOS and Android need different URLs**: iOS Simulator uses `localhost:8080`, Android Emulator uses `10.0.2.2:8080`
+- You need to **rebuild** the project after changing `local.properties` (it's compile-time, not runtime)
+- For **cross-platform development**, use environment variables to set different URLs per platform:
+  ```bash
+  # Build for Android Emulator
+  API_BASE_URL=http://10.0.2.2:8080 ./gradlew :composeApp:assembleDebug
+
+  # Build iOS framework for Simulator
+  API_BASE_URL=http://localhost:8080 ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
+  ```
+
 ## Building and Running
 
 ### 1. Run the Server
