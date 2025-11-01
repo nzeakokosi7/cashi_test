@@ -2,7 +2,8 @@ package com.test.cashi
 
 import android.app.Application
 import com.google.firebase.FirebaseApp
-import com.test.cashi.di.appModule
+import com.test.cashi.di.androidModule
+import com.test.cashi.di.commonModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -12,7 +13,7 @@ import org.koin.core.context.startKoin
  *
  * Initializes:
  * - Firebase Android SDK
- * - Koin dependency injection
+ * - Koin dependency injection (common + Android-specific modules)
  *
  * Register in AndroidManifest.xml
  */
@@ -23,11 +24,11 @@ class CashiApplication : Application() {
         // Initialize Firebase
         FirebaseApp.initializeApp(this)
 
-        // Initialize Koin
+        // Initialize Koin with both common and platform-specific modules
         startKoin {
             androidLogger()
             androidContext(this@CashiApplication)
-            modules(appModule)
+            modules(commonModule, androidModule)
         }
     }
 }
