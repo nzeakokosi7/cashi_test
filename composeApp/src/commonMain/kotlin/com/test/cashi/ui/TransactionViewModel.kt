@@ -1,47 +1,28 @@
 package com.test.cashi.ui
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.test.cashi.domain.model.Currency
 import com.test.cashi.domain.model.Payment
 import com.test.cashi.domain.usecase.ObserveTransactionsUseCase
 import com.test.cashi.domain.usecase.SubmitPaymentUseCase
-import kotlinx.coroutines.flow.*
+import com.test.cashi.ui.base.BaseViewModel
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 /**
  * ViewModel for transaction list and payment submission
  *
- * Clean Architecture:
- * - ViewModel depends only on use cases (not repositories)
- * - Business logic lives in use cases
- * - ViewModel handles UI state and coordination
- *
- * This makes testing easier:
- * - Use cases can be mocked for UI tests
- * - Clear separation between business logic and UI logic
- * - Easy to test state transitions
+ * Follows BaseViewModel pattern with:
+ * - TransactionUIState: All UI state in one place
+ * - TransactionUIAction: One-time events (navigation, success messages)
+ * - Clean separation between state and events
  */
 class TransactionViewModel(
     private val observeTransactionsUseCase: ObserveTransactionsUseCase,
     private val submitPaymentUseCase: SubmitPaymentUseCase
-) : ViewModel() {
-
-    // Transaction list state
-    private val _transactions = MutableStateFlow<List<Payment>>(emptyList())
-    val transactions: StateFlow<List<Payment>> = _transactions.asStateFlow()
-
-    // Loading state
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    // Payment submission state
-    private val _paymentState = MutableStateFlow<PaymentSubmissionState>(PaymentSubmissionState.Idle)
-    val paymentState: StateFlow<PaymentSubmissionState> = _paymentState.asStateFlow()
-
-    // Validation errors
-    private val _validationErrors = MutableStateFlow<List<String>>(emptyList())
-    val validationErrors: StateFlow<List<String>> = _validationErrors.asStateFlow()
+) : BaseViewModel<TransactionUIAction, TransactionUIState>(
+    defaultState = TransactionUIState()
+) {
 
     init {
         observeTransactions()
@@ -54,13 +35,17 @@ class TransactionViewModel(
         viewModelScope.launch {
             observeTransactionsUseCase()
                 .catch { e ->
-                    // Handle errors from Firebase listener
-                    _paymentState.value = PaymentSubmissionState.Error(
-                        "Failed to load transactions: ${e.message}"
+                    state = state.copy(
+                        isLoadingTransactions = false,
+                        error = "Failed to load transactions: ${e.message}"
                     )
                 }
                 .collect { payments ->
-                    _transactions.value = payments
+                    state = state.copy(
+                        transactions = payments,
+                        isLoadingTransactions = false,
+                        error = null
+                    )
                 }
         }
     }
@@ -74,32 +59,23 @@ class TransactionViewModel(
         currency: Currency
     ) {
         // Clear previous state
-        _validationErrors.value = emptyList()
-        _paymentState.value = PaymentSubmissionState.Idle
+        state = state.copy(
+            isSubmittingPayment = false,
+            error = null
+        )
 
         // Parse amount
         val amountDouble = amount.toDoubleOrNull()
         if (amountDouble == null) {
-            _validationErrors.value = listOf("Invalid amount format")
-            return
-        }
-
-        // Get validation errors
-        val errors = submitPaymentUseCase.getValidationErrors(
-            recipientEmail = recipientEmail.trim(),
-            amount = amountDouble,
-            currency = currency
-        )
-
-        if (errors.isNotEmpty()) {
-            _validationErrors.value = errors
+            state = state.copy(
+                error = "Invalid amount format"
+            )
             return
         }
 
         // Submit via use case
         viewModelScope.launch {
-            _isLoading.value = true
-            _paymentState.value = PaymentSubmissionState.Loading
+            state = state.copy(isSubmittingPayment = true)
 
             submitPaymentUseCase(
                 recipientEmail = recipientEmail.trim(),
@@ -107,40 +83,50 @@ class TransactionViewModel(
                 currency = currency
             )
                 .onSuccess { response ->
+                    state = state.copy(isSubmittingPayment = false)
+
                     if (response.success) {
-                        _paymentState.value = PaymentSubmissionState.Success
+                        // Dispatch one-time success action
+                        dispatchAction(TransactionUIAction.PaymentSuccess)
                     } else {
-                        _paymentState.value = PaymentSubmissionState.Error(
-                            response.error ?: "Unknown error"
+                        state = state.copy(
+                            error = response.error ?: "Unknown error"
                         )
                     }
                 }
                 .onFailure { e ->
-                    _paymentState.value = PaymentSubmissionState.Error(
-                        e.message ?: "Network error"
+                    state = state.copy(
+                        isSubmittingPayment = false,
+                        error = e.message ?: "Network error"
                     )
                 }
-
-            _isLoading.value = false
         }
     }
 
     /**
-     * Reset payment submission state
+     * Clear error message
      */
-    fun resetPaymentState() {
-        _paymentState.value = PaymentSubmissionState.Idle
-        _validationErrors.value = emptyList()
+    fun clearError() {
+        state = state.copy(error = null)
     }
 }
 
 /**
- * Represents the state of payment submission
- * Sealed class makes it easy to handle all states in UI
+ * Represents the complete UI state for the transaction screen
  */
-sealed class PaymentSubmissionState {
-    data object Idle : PaymentSubmissionState()
-    data object Loading : PaymentSubmissionState()
-    data object Success : PaymentSubmissionState()
-    data class Error(val message: String) : PaymentSubmissionState()
+data class TransactionUIState(
+    val transactions: List<Payment> = emptyList(),
+    val isLoadingTransactions: Boolean = true,
+    val isSubmittingPayment: Boolean = false,
+    val error: String? = null
+)
+
+/**
+ * One-time UI actions (events that should only be handled once)
+ */
+sealed class TransactionUIAction {
+    /**
+     * Payment submitted successfully - dismiss bottom sheet
+     */
+    data object PaymentSuccess : TransactionUIAction()
 }
