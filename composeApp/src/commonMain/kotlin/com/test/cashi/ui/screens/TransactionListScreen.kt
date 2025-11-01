@@ -15,6 +15,7 @@ import com.test.cashi.domain.model.Currency
 import com.test.cashi.domain.model.Payment
 import com.test.cashi.domain.model.TransactionStatus
 import com.test.cashi.ui.components.EmptyStateView
+import com.test.cashi.ui.components.LoadingStateView
 import com.test.cashi.ui.components.TransactionCard
 import com.test.cashi.ui.theme.CashiTheme
 import kotlin.time.Clock
@@ -25,6 +26,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun TransactionListScreen(
     transactions: List<Payment>,
+    isLoading: Boolean = false,
     onAddPaymentClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -58,26 +60,36 @@ fun TransactionListScreen(
         },
         modifier = modifier
     ) { paddingValues ->
-        if (transactions.isEmpty()) {
-            EmptyStateView(
-                onAddPaymentClick = onAddPaymentClick,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            )
-        } else {
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    top = paddingValues.calculateTopPadding() + 16.dp,
-                    bottom = paddingValues.calculateBottomPadding() + 16.dp,
-                    start = 16.dp,
-                    end = 16.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(transactions, key = { it.id }) { payment ->
-                    TransactionCard(payment = payment)
+        when {
+            isLoading -> {
+                LoadingStateView(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                )
+            }
+            transactions.isEmpty() -> {
+                EmptyStateView(
+                    onAddPaymentClick = onAddPaymentClick,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                )
+            }
+            else -> {
+                LazyColumn(
+                    contentPadding = PaddingValues(
+                        top = paddingValues.calculateTopPadding() + 16.dp,
+                        bottom = paddingValues.calculateBottomPadding() + 16.dp,
+                        start = 16.dp,
+                        end = 16.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(transactions, key = { it.id }) { payment ->
+                        TransactionCard(payment = payment)
+                    }
                 }
             }
         }
@@ -155,6 +167,19 @@ fun TransactionListScreenManyTransactionsPreview() {
                     }
                 )
             },
+            onAddPaymentClick = {}
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
+@Preview
+@Composable
+fun TransactionListScreenLoadingPreview() {
+    CashiTheme {
+        TransactionListScreen(
+            transactions = emptyList(),
+            isLoading = true,
             onAddPaymentClick = {}
         )
     }
