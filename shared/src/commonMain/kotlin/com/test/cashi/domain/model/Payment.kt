@@ -1,6 +1,9 @@
 package com.test.cashi.domain.model
 
 import kotlinx.serialization.Serializable
+import kotlin.math.absoluteValue
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Represents a payment transaction
@@ -12,18 +15,25 @@ import kotlinx.serialization.Serializable
  * @property status Current status of the payment
  */
 @Serializable
-data class Payment(
+data class Payment @OptIn(ExperimentalTime::class) constructor(
     val id: String = "",
     val recipientEmail: String,
     val amount: Double,
     val currency: Currency,
-    val timestamp: Long = System.currentTimeMillis(),
+    val timestamp: Long = Clock.System.now().toEpochMilliseconds(),
     val status: TransactionStatus = TransactionStatus.PENDING
 ) {
     /**
      * Formats the payment amount with currency symbol
      */
-    fun formattedAmount(): String = "${currency.symbol}${"%.2f".format(amount)}"
+    fun formattedAmount(): String {
+        // Convert to cents first to avoid floating-point issues
+        val cents = kotlin.math.round(amount * 100).toLong()
+        val dollars = cents / 100
+        val remainingCents = (cents % 100).absoluteValue
+
+        return "${currency.symbol}$dollars.${remainingCents.toString().padStart(2, '0')}"
+    }
 }
 
 /**

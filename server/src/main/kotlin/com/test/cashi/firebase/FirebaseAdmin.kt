@@ -37,8 +37,35 @@ object FirebaseAdmin {
         try {
             val configPath = System.getenv("FIREBASE_CONFIG_PATH") ?: serviceAccountPath
 
+            // Try multiple paths to find the service account key
+            val possiblePaths = listOf(
+                configPath,                                    // Direct path (environment variable or parameter)
+                "serviceAccountKey.json",                      // Working directory
+                "../serviceAccountKey.json",                   // Parent directory (for server module)
+                "../../serviceAccountKey.json",                // Project root from build directory
+                System.getProperty("user.dir") + "/serviceAccountKey.json"  // Absolute from current dir
+            )
+
+            var foundPath: String? = null
+            for (path in possiblePaths) {
+                val file = java.io.File(path)
+                if (file.exists() && file.canRead()) {
+                    foundPath = path
+                    println("Found Firebase config at: ${file.absolutePath}")
+                    break
+                }
+            }
+
+            if (foundPath == null) {
+                throw IllegalStateException(
+                    "Could not find serviceAccountKey.json. Searched in:\n" +
+                    possiblePaths.joinToString("\n") { "  - $it" } +
+                    "\n\nCurrent working directory: ${System.getProperty("user.dir")}"
+                )
+            }
+
             val options = FirebaseOptions.builder()
-                .setCredentials(GoogleCredentials.fromStream(FileInputStream(configPath)))
+                .setCredentials(GoogleCredentials.fromStream(FileInputStream(foundPath)))
                 .build()
 
             firebaseApp = FirebaseApp.initializeApp(options)
