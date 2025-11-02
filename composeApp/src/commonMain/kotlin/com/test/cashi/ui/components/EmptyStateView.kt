@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.test.cashi.ui.localization.LocalStrings
 import com.test.cashi.ui.theme.CashiTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -17,6 +18,8 @@ fun EmptyStateView(
     modifier: Modifier = Modifier,
     onAddPaymentClick: () -> Unit
 ) {
+    val strings = LocalStrings.current
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -34,7 +37,7 @@ fun EmptyStateView(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "No Transactions Yet",
+            text = strings.noTransactionsYet,
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center
@@ -43,7 +46,7 @@ fun EmptyStateView(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Start sending money to friends and family.\nYour transactions will appear here.",
+            text = strings.emptyStateDescription,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -62,7 +65,7 @@ fun EmptyStateView(
             )
         ) {
             Text(
-                text = "Send Your First Payment",
+                text = strings.sendFirstPayment,
                 style = MaterialTheme.typography.labelLarge
             )
         }

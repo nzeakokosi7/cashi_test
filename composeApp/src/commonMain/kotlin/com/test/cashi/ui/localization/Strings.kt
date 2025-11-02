@@ -12,7 +12,8 @@ interface Strings {
     val transactions: String
     val sendPayment: String
     val noTransactionsYet: String
-    val startBySending: String
+    val emptyStateDescription: String
+    val sendFirstPayment: String
 
     // Payment Form
     val recipientEmail: String
@@ -43,8 +44,9 @@ object EnglishStrings : Strings {
     override val appName = "Cashi"
     override val transactions = "Transactions"
     override val sendPayment = "Send Payment"
-    override val noTransactionsYet = "No transactions yet"
-    override val startBySending = "Start by sending your first payment"
+    override val noTransactionsYet = "No Transactions Yet"
+    override val emptyStateDescription = "Start sending money to friends and family.\nYour transactions will appear here."
+    override val sendFirstPayment = "Send Your First Payment"
 
     override val recipientEmail = "Recipient Email"
     override val recipientEmailPlaceholder = "example@email.com"
@@ -74,7 +76,8 @@ object ArabicStrings : Strings {
     override val transactions = "المعاملات"
     override val sendPayment = "إرسال دفعة"
     override val noTransactionsYet = "لا توجد معاملات بعد"
-    override val startBySending = "ابدأ بإرسال أول دفعة لك"
+    override val emptyStateDescription = "ابدأ بإرسال الأموال للأصدقاء والعائلة.\nستظهر معاملاتك هنا."
+    override val sendFirstPayment = "أرسل دفعتك الأولى"
 
     override val recipientEmail = "البريد الإلكتروني للمستلم"
     override val recipientEmailPlaceholder = "example@email.com"
