@@ -266,15 +266,22 @@ The server will start on `http://localhost:8080`
 ./gradlew :composeApp:installDebug
 ```
 
-**Note**: The app is configured to connect to `http://10.0.2.2:8080` for Android emulators (localhost proxy). For physical devices, update the `baseUrl` in `PaymentApiClient.kt`.
+**Note**: The app is configured to connect to `http://10.0.2.2:8080` for Android emulators (localhost proxy). For physical devices, update the `api.base.url` in `local.properties` to your machine's local IP address (e.g., `http://192.168.1.100:8080`), then rebuild the app.
 
 ### 3. iOS Setup (Future)
 
-The shared business logic is ready for iOS, but the UI integration is not yet implemented. To add iOS support:
+The project uses Compose Multiplatform, which means both the UI and business logic are shared and ready for iOS. To add iOS support:
 
-1. Open `iosApp/iosApp.xcodeproj` in Xcode
-2. Initialize Koin with `commonModule` in Swift
-3. Create SwiftUI views that call the shared ViewModels
+1. Configure iOS build targets in `composeApp/build.gradle.kts`
+2. Create an iOS platform module (`composeApp/iosMain/di/PlatformModule.kt`) with iOS-specific implementations (like `PaymentRepository`)
+3. Build the iOS framework:
+   ```bash
+   ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+   ```
+4. Open the project in Xcode and add the generated framework
+5. Initialize Koin in the iOS app entry point with both `commonModule` and `iosModule`
+
+**Note**: The Compose UI in `composeApp/commonMain/` will work on iOS without modification thanks to Compose Multiplatform
 
 ## Testing
 
@@ -382,14 +389,14 @@ start jmeter-tests/reports/index.html
 ```
 
 **Test Plan Details:**
-- **Thread Group**: 100 concurrent users
-- **Ramp-Up Period**: 10 seconds
+- **Thread Group**: 5 concurrent users
+- **Ramp-Up Period**: 5 seconds
 - **Loop Count**: 10 iterations per user
-- **Total Requests**: 1,000 payment submissions
+- **Total Requests**: 50 payment submissions (5 users × 10 iterations)
 - **Assertions**: Response time < 2s, HTTP 200/201 status codes
 
 **Expected Results:**
-- Throughput: ~50-100 requests/second
+- Throughput: ~5-10 requests/second
 - Average Response Time: < 500ms
 - Error Rate: < 1%
 
@@ -460,7 +467,7 @@ appium
   - Validates currency symbol updates
 
 **Detailed Documentation:**
-See [APPIUM_TESTING.md](composeApp/APPIUM_TESTING.md) for comprehensive setup and troubleshooting guide.
+See [APPIUM_TESTING.md](appium-tests/APPIUM_TESTING.md) for comprehensive setup and troubleshooting guide.
 
 ## Running All Tests
 
