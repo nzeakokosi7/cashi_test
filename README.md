@@ -1,6 +1,6 @@
 # Cashi - Kotlin Multiplatform Payment Application
 
-A production-ready Kotlin Multiplatform payment application demonstrating clean architecture, real-time data synchronization, and comprehensive testing strategies.
+A semi production-ready Kotlin Multiplatform payment application demonstrating clean architecture, real-time data synchronization, and comprehensive testing strategies.
 
 ## Overview
 
@@ -82,7 +82,8 @@ cashi/
 ├── server/              # Ktor backend server
 │   ├── main/kotlin/     # Server implementation
 │   └── test/kotlin/     # BDD tests and server tests
-└── jmeter-tests/        # JMeter load testing scripts
+├── jmeter-tests/        # JMeter load testing scripts
+└── appium-tests/        # Appium UI automation tests
 ```
 
 ## Architecture

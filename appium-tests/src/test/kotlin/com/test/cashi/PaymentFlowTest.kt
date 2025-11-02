@@ -25,7 +25,7 @@ class PaymentFlowTest : BaseAppiumTest() {
         // Step 1: Open the payment bottom sheet by clicking the FAB (Floating Action Button)
         val addPaymentButton = wait.until(
             ExpectedConditions.presenceOfElementLocated(
-                AppiumBy.accessibilityId("Add Payment")
+                AppiumBy.accessibilityId("SendPaymentFAB")
             )
         )
         addPaymentButton.click()
@@ -81,21 +81,14 @@ class PaymentFlowTest : BaseAppiumTest() {
         // Don't press BACK as it will dismiss the bottom sheet
         waitFor(2)
 
-        // Click Send Payment button
-        // There are TWO "Send Payment" texts - header (index 0) and button (index 1)
-        // Find all elements and click the second one (the button)
-        val sendPaymentElements = wait.until(
-            ExpectedConditions.numberOfElementsToBeMoreThan(
-                AppiumBy.xpath("//*[@text='Send Payment']"),
-                0
+        // Click Submit Payment button using accessibility ID
+        val submitButton = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                AppiumBy.accessibilityId("SubmitPaymentButton")
             )
         )
-        println("Found ${sendPaymentElements.size} elements with text 'Send Payment'")
-
-        // The button should be the last one (after the header)
-        val sendButton = sendPaymentElements.lastOrNull() ?: throw Exception("Send Payment button not found")
-        assertTrue("Send button should be enabled", sendButton.isEnabled)
-        sendButton.click()
+        assertTrue("Submit button should be enabled", submitButton.isEnabled)
+        submitButton.click()
 
         // Step 8: Wait for payment to be submitted (loading state)
         waitFor(3)
@@ -136,10 +129,13 @@ class PaymentFlowTest : BaseAppiumTest() {
 
     @Test
     fun testPaymentFormValidation() {
+        // Dump page source for debugging
+        dumpPageSource("Initial Page Load")
+
         // Step 1: Open the payment bottom sheet
         val addPaymentButton = wait.until(
             ExpectedConditions.presenceOfElementLocated(
-                AppiumBy.accessibilityId("Add Payment")
+                AppiumBy.accessibilityId("SendPaymentFAB")
             )
         )
         addPaymentButton.click()
@@ -181,7 +177,7 @@ class PaymentFlowTest : BaseAppiumTest() {
         // Step 1: Open the payment bottom sheet
         val addPaymentButton = wait.until(
             ExpectedConditions.presenceOfElementLocated(
-                AppiumBy.accessibilityId("Add Payment")
+                AppiumBy.accessibilityId("SendPaymentFAB")
             )
         )
         addPaymentButton.click()

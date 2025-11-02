@@ -52,7 +52,8 @@ abstract class BaseAppiumTest {
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10))
 
         // Wait for app to fully load before proceeding with test
-        Thread.sleep(2000)
+        // Compose apps may take longer to render the first screen
+        Thread.sleep(5000)
     }
 
     @After
@@ -67,5 +68,18 @@ abstract class BaseAppiumTest {
      */
     protected fun waitFor(seconds: Long) {
         Thread.sleep(seconds * 1000)
+    }
+
+    /**
+     * Helper method to dump page source for debugging
+     */
+    protected fun dumpPageSource(message: String = "Page Source") {
+        try {
+            println("\n=== $message ===")
+            println(driver.pageSource)
+            println("=================\n")
+        } catch (e: Exception) {
+            println("Failed to dump page source: ${e.message}")
+        }
     }
 }

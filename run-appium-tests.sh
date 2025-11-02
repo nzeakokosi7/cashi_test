@@ -78,31 +78,36 @@ else
     echo -e "${GREEN}✓ Cashi app is installed${NC}"
 fi
 
-# Check if Appium server is running
-if ! curl -s http://127.0.0.1:4723/status > /dev/null 2>&1; then
-    echo -e "${YELLOW}Starting Appium server...${NC}"
-    appium > appium.log 2>&1 &
-    APPIUM_PID=$!
-    echo "Appium PID: $APPIUM_PID"
+# Kill any existing Appium server to ensure fresh start with correct environment
+if curl -s http://127.0.0.1:4723/status > /dev/null 2>&1; then
+    echo -e "${YELLOW}Stopping existing Appium server...${NC}"
+    pkill -f appium || true
+    sleep 2
+fi
 
-    # Wait for Appium to start
-    echo "Waiting for Appium server to start..."
-    for i in {1..30}; do
-        if curl -s http://127.0.0.1:4723/status > /dev/null 2>&1; then
-            echo -e "${GREEN}✓ Appium server is running${NC}"
-            break
-        fi
-        sleep 1
-    done
+# Also kill by port to be sure
+lsof -ti:4723 | xargs kill -9 2>/dev/null || true
 
-    if ! curl -s http://127.0.0.1:4723/status > /dev/null 2>&1; then
-        echo -e "${RED}Error: Failed to start Appium server${NC}"
-        cat appium.log
-        exit 1
+# Start Appium server with current environment
+echo -e "${YELLOW}Starting Appium server...${NC}"
+appium > appium.log 2>&1 &
+APPIUM_PID=$!
+echo "Appium PID: $APPIUM_PID"
+
+# Wait for Appium to start
+echo "Waiting for Appium server to start..."
+for i in {1..30}; do
+    if curl -s http://127.0.0.1:4723/status > /dev/null 2>&1; then
+        echo -e "${GREEN}✓ Appium server is running${NC}"
+        break
     fi
-else
-    echo -e "${GREEN}✓ Appium server is already running${NC}"
-    APPIUM_PID=""
+    sleep 1
+done
+
+if ! curl -s http://127.0.0.1:4723/status > /dev/null 2>&1; then
+    echo -e "${RED}Error: Failed to start Appium server${NC}"
+    cat appium.log
+    exit 1
 fi
 
 # Run tests
@@ -117,7 +122,7 @@ if [ ! -z "$1" ]; then
 fi
 
 # Add additional gradle options
-TEST_COMMAND="$TEST_COMMAND --info"
+TEST_COMMAND="$TEST_COMMAND --info --rerun-tasks"
 
 # Run the tests
 if $TEST_COMMAND; then
