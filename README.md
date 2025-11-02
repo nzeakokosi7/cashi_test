@@ -77,7 +77,7 @@ cashi/
 ├── server/              # Ktor backend server
 │   ├── main/kotlin/     # Server implementation
 │   └── test/kotlin/     # BDD tests and server tests
-└── loadTests/           # JMeter load testing scripts
+└── jmeter-tests/        # JMeter load testing scripts
 ```
 
 ## Architecture
@@ -263,12 +263,17 @@ The shared business logic is ready for iOS, but the UI integration is not yet im
 Run all unit tests in the shared module:
 
 ```bash
-# Run all tests
+# Run Android unit tests and view HTML report (recommended)
+./gradlew :shared:testDebugUnitTest && open shared/build/reports/tests/testDebugUnitTest/index.html
+
+# Run all platform tests (Android, JVM, iOS)
 ./gradlew :shared:allTests
 
-# Run only common tests
-./gradlew :shared:cleanAllTests
+# If tests are cached and you need to force re-run, clean first
+./gradlew :shared:clean :shared:testDebugUnitTest
 ```
+
+**Note**: Gradle caches test results. Test output only appears in console when tests fail. Always check the HTML report for detailed results including passed tests, timing, and coverage.
 
 **Test Coverage:**
 - `PaymentValidatorTest` - Email and amount validation logic
@@ -276,23 +281,61 @@ Run all unit tests in the shared module:
 - `SubmitPaymentUseCaseTest` - Payment submission flow with mocks
 - `ObserveTransactionsUseCaseTest` - Real-time transaction observation
 
-### BDD Tests (Cucumber)
+**Generated Reports**: `shared/build/reports/tests/testDebugUnitTest/index.html`
 
-Run Cucumber BDD tests for payment scenarios:
+### Server Tests
+
+Run server integration tests:
 
 ```bash
-# Run all BDD tests
-./gradlew :server:test --tests "com.test.cashi.RunCucumberTest"
+# Run server tests and view HTML report (recommended)
+./gradlew :server:test && open server/build/reports/tests/test/index.html
+
+# Or run tests only
+./gradlew :server:test
+
+# View the HTML report separately (macOS/Linux)
+open server/build/reports/tests/test/index.html
+
+# View the HTML report separately (Windows)
+start server/build/reports/tests/test/index.html
 ```
 
-**Feature Files** (`server/src/test/resources/features/`):
-- `payment.feature` - Complete payment submission scenarios
-  - Successful payments
-  - Invalid email validation
-  - Invalid amount validation
-  - Network error handling
+**Test Coverage:**
+- `ApplicationTest` - Server endpoint tests
+  - Health check endpoint
+  - Payment submission endpoint
+  - Request/response validation
 
 **Generated Reports**: Available in `server/build/reports/tests/test/index.html`
+
+### BDD Tests (Cucumber)
+
+Run Cucumber BDD tests for payment submission scenarios:
+
+```bash
+# Run Cucumber tests in shared module
+./gradlew :shared:testDebugUnitTest --tests "CucumberTestRunner"
+
+# View the HTML report
+open shared/build/reports/cucumber/cucumber-report.html
+```
+
+**Feature Files** (`shared/src/androidUnitTest/resources/features/`):
+- `payment_submission.feature` - Payment submission scenarios (8 scenarios)
+  - Successful payments (USD and EUR)
+  - Invalid email validation
+  - Empty email validation
+  - Zero/negative/excessive amount validation
+  - Network error handling
+
+**Step Definitions**: Located in `shared/src/androidUnitTest/kotlin/com/test/cashi/bdd/steps/`
+
+**Generated Reports**:
+- Cucumber HTML: `shared/build/reports/cucumber/cucumber-report.html`
+- Cucumber JSON: `shared/build/reports/cucumber/cucumber-report.json`
+
+**Note**: Cucumber test results don't appear in console output - check the HTML report to view test results.
 
 ### Load Testing (JMeter)
 
@@ -305,15 +348,17 @@ Test the server's performance under load:
 **Running Load Tests:**
 
 ```bash
-# Start the server first
+# Start the server first (in a separate terminal)
 ./gradlew :server:run
 
-# In a new terminal, run JMeter test
-cd loadTests
-jmeter -n -t PaymentAPI_LoadTest.jmx -l results.jtl -e -o reports/
+# In a new terminal, run JMeter test from project root
+jmeter -n -t jmeter-tests/PaymentAPI_LoadTest.jmx -l jmeter-tests/results.jtl -e -o jmeter-tests/reports/
 
-# View reports
-open reports/index.html
+# View reports (macOS/Linux)
+open jmeter-tests/reports/index.html
+
+# View reports (Windows)
+start jmeter-tests/reports/index.html
 ```
 
 **Test Plan Details:**
@@ -343,9 +388,17 @@ Test the complete payment flow with automated UI tests:
 
 **Running Appium Tests:**
 
+**Important**: Ensure the backend server is running before starting Appium tests, as the app needs to connect to the API.
+
 **Option A: Using the Helper Script (Recommended)**
 ```bash
-# Run all Appium tests (automatically handles Appium server, app installation, etc.)
+# 1. Start the backend server in a separate terminal
+./gradlew :server:run
+
+# 2. Set ANDROID_HOME environment variable
+export ANDROID_HOME=$HOME/Library/Android/sdk
+
+# 3. Run all Appium tests (automatically handles Appium server, app installation, etc.)
 ./run-appium-tests.sh
 
 # Run a specific test class
@@ -357,13 +410,19 @@ Test the complete payment flow with automated UI tests:
 
 **Option B: Manual Setup**
 ```bash
-# 1. Start Appium server in a separate terminal
+# 1. Start the backend server in a separate terminal
+./gradlew :server:run
+
+# 2. Set ANDROID_HOME environment variable
+export ANDROID_HOME=$HOME/Library/Android/sdk
+
+# 3. Start Appium server in another terminal
 appium
 
-# 2. Install the app
+# 4. Install the app
 ./gradlew :composeApp:installDebug
 
-# 3. Run the tests
+# 5. Run the tests
 ./gradlew :appium-tests:test
 ```
 
@@ -399,7 +458,7 @@ Run the complete test suite:
 
 # 4. Wait for server startup, then run load tests
 sleep 5
-cd loadTests && jmeter -n -t PaymentAPI_LoadTest.jmx -l results.jtl
+jmeter -n -t jmeter-tests/PaymentAPI_LoadTest.jmx -l jmeter-tests/results.jtl -e -o jmeter-tests/reports/
 
 # 5. Stop the server
 pkill -f "server:run"

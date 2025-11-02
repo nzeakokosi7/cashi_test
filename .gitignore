@@ -23,3 +23,9 @@ serviceAccountKey.json
 **/serviceAccountKey.json
 google-services.json
 **/google-services.json
+
+# Test results and reports
+jmeter-tests/results.jtl
+jmeter-tests/reports/
+appium.log
+jmeter.log

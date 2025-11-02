@@ -21,6 +21,14 @@ dependencies {
 tasks.test {
     useJUnit()
 
+    // Pass ANDROID_HOME environment variable to test process
+    // This must be set in your shell before running tests
+    val androidHome = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
+    if (androidHome != null) {
+        environment("ANDROID_HOME", androidHome)
+        environment("ANDROID_SDK_ROOT", androidHome)
+    }
+
     // Add test output logging
     testLogging {
         events("passed", "skipped", "failed")

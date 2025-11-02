@@ -22,13 +22,31 @@ fi
 
 echo -e "${GREEN}✓ Appium is installed${NC}"
 
-# Check if UiAutomator2 driver is installed
-if ! appium driver list --installed | grep -q "uiautomator2"; then
-    echo -e "${YELLOW}Warning: UiAutomator2 driver not found. Installing...${NC}"
-    appium driver install uiautomator2
+# Check if ANDROID_HOME is set
+if [ -z "$ANDROID_HOME" ] && [ -z "$ANDROID_SDK_ROOT" ]; then
+    echo -e "${RED}Error: ANDROID_HOME environment variable is not set${NC}"
+    echo ""
+    echo "Please export ANDROID_HOME before running tests:"
+    echo ""
+    echo -e "${YELLOW}export ANDROID_HOME=\$HOME/Library/Android/sdk${NC}"
+    echo ""
+    echo "Add this to your ~/.zshrc or ~/.bash_profile to make it permanent:"
+    echo -e "${YELLOW}echo 'export ANDROID_HOME=\$HOME/Library/Android/sdk' >> ~/.zshrc${NC}"
+    echo ""
+    exit 1
 fi
 
-echo -e "${GREEN}✓ UiAutomator2 driver is installed${NC}"
+echo -e "${GREEN}✓ ANDROID_HOME is set: ${ANDROID_HOME:-$ANDROID_SDK_ROOT}${NC}"
+
+# Check if UiAutomator2 driver is installed
+DRIVER_CHECK=$(appium driver list --installed 2>&1 | grep "uiautomator2" || true)
+if [ -z "$DRIVER_CHECK" ]; then
+    echo -e "${YELLOW}Warning: UiAutomator2 driver not found. Installing...${NC}"
+    appium driver install uiautomator2
+    echo -e "${GREEN}✓ UiAutomator2 driver installed${NC}"
+else
+    echo -e "${GREEN}✓ UiAutomator2 driver is already installed${NC}"
+fi
 
 # Check if ADB is available
 if ! command -v adb &> /dev/null; then

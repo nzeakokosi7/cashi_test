@@ -239,17 +239,16 @@ class SubmitPaymentUseCaseTest {
         // Given
         val email = "invalid-email"
         val amount = 0.0
-        val currency: Currency? = null
+        val currency = Currency.USD
 
         // When
-        val errors = useCase.getValidationErrors(email, amount, currency!!)
+        val errors = useCase.getValidationErrors(email, amount, currency)
 
         // Then
-        errors.size shouldBe 3
+        errors.size shouldBe 2
         errors shouldBe listOf(
             "Invalid email format",
-            "Amount must be greater than 0",
-            "Currency is required"
+            "Amount must be greater than 0"
         )
     }
 }

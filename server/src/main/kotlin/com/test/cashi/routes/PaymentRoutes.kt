@@ -25,8 +25,9 @@ import io.ktor.server.routing.*
  */
 fun Route.paymentRoutes() {
     val validator = PaymentValidator()
-    val firestore = FirebaseAdmin.getFirestore()
-    val paymentsCollection = firestore.collection("payments")
+    val paymentsCollection by lazy {
+        FirebaseAdmin.getFirestore().collection("payments")
+    }
 
     /**
      * POST /payments
