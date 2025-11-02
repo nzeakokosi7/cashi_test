@@ -29,3 +29,4 @@ jmeter-tests/results.jtl
 jmeter-tests/reports/
 appium.log
 jmeter.log
+/DEMO_SCRIPT.md

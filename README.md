@@ -63,6 +63,11 @@ This configuration exists solely to simplify the demonstration of the app's arch
 - JMeter for load testing
 - Appium for UI automation testing
 
+### Localization
+- **English** (default)
+- **Arabic** - Full support for Sudanese/Arabic-speaking users
+- **Language Toggle** - Switch between languages with a single tap
+
 ## Project Structure
 
 ```
@@ -110,6 +115,51 @@ cashi/
 - **Repository Pattern**: Abstract data sources with platform-specific implementations
 - **Use Case Pattern**: Encapsulate business logic operations
 - **Dependency Injection**: Koin modules split by platform (commonModule + androidModule)
+
+## Localization
+
+Cashi includes built-in internationalization with support for Sudanese users:
+
+### Supported Languages
+
+- **English** (default) - Full UI coverage
+- **Arabic** (العربية) - Complete translation for Sudanese/Arabic-speaking users
+
+### Features
+
+- **Seamless Language Switching**: Tap the language icon (🌐) in the top app bar to switch between English and Arabic
+- **Real-time Updates**: All UI elements update instantly when switching languages
+- **KMP-Compatible**: Localization is implemented in the shared Compose layer, making it fully cross-platform
+- **RTL Support Ready**: Arabic strings are provided, with RTL layout support ready to be enabled
+
+### Implementation
+
+The localization system is built on Kotlin Multiplatform and Compose Multiplatform:
+
+1. **Strings Interface** (`composeApp/commonMain/ui/localization/Strings.kt`)
+   - Defines all localizable strings
+   - Implemented for both English and Arabic
+
+2. **Locale Manager** (`composeApp/commonMain/ui/localization/LocaleManager.kt`)
+   - Manages current locale state
+   - Provides language switching functionality
+   - Integrates with Compose via CompositionLocal
+
+3. **Usage in UI**
+   ```kotlin
+   val strings = LocalStrings.current
+   Text(text = strings.sendPayment) // Automatically displays in current language
+   ```
+
+### Adding More Languages
+
+To add a new language:
+
+1. Create a new object implementing the `Strings` interface
+2. Add the language to the `SupportedLocale` enum
+3. Provide translations for all string properties
+
+This architecture makes it easy to expand support to additional languages in the future.
 
 ## Prerequisites
 

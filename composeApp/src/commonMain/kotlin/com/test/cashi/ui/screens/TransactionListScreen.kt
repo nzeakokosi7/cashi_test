@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +18,8 @@ import com.test.cashi.domain.model.TransactionStatus
 import com.test.cashi.ui.components.EmptyStateView
 import com.test.cashi.ui.components.LoadingStateView
 import com.test.cashi.ui.components.TransactionCard
+import com.test.cashi.ui.localization.LocalLocaleManager
+import com.test.cashi.ui.localization.LocalStrings
 import com.test.cashi.ui.theme.CashiTheme
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -30,15 +33,27 @@ fun TransactionListScreen(
     onAddPaymentClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val strings = LocalStrings.current
+    val localeManager = LocalLocaleManager.current
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Transactions",
+                        text = strings.transactions,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.SemiBold
                     )
+                },
+                actions = {
+                    IconButton(onClick = { localeManager.toggleLocale() }) {
+                        Icon(
+                            imageVector = Icons.Default.Language,
+                            contentDescription = "Toggle Language",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -54,7 +69,7 @@ fun TransactionListScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add Payment"
+                    contentDescription = strings.sendPayment
                 )
             }
         },

@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.test.cashi.domain.model.Currency
+import com.test.cashi.ui.localization.LocalStrings
 import com.test.cashi.ui.theme.CashiTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -51,6 +52,7 @@ fun PaymentFormContent(
     errorMessage: String? = null,
     modifier: Modifier = Modifier
 ) {
+    val strings = LocalStrings.current
     var recipientEmail by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var selectedCurrency by remember { mutableStateOf(Currency.USD) }
@@ -65,7 +67,7 @@ fun PaymentFormContent(
     ) {
         // Header
         Text(
-            text = "Send Payment",
+            text = strings.sendPayment,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -76,8 +78,8 @@ fun PaymentFormContent(
         OutlinedTextField(
             value = recipientEmail,
             onValueChange = { recipientEmail = it },
-            label = { Text("Recipient Email") },
-            placeholder = { Text("example@email.com") },
+            label = { Text(strings.recipientEmail) },
+            placeholder = { Text(strings.recipientEmailPlaceholder) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Email,
@@ -104,7 +106,7 @@ fun PaymentFormContent(
                 value = "${selectedCurrency.code} (${selectedCurrency.symbol})",
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Currency") },
+                label = { Text(strings.currency) },
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = showCurrencyDropdown)
                 },
@@ -145,8 +147,8 @@ fun PaymentFormContent(
                     amount = it
                 }
             },
-            label = { Text("Amount") },
-            placeholder = { Text("0.00") },
+            label = { Text(strings.amount) },
+            placeholder = { Text(strings.amountPlaceholder) },
             leadingIcon = {
                 Text(
                     text = selectedCurrency.symbol,
@@ -204,7 +206,7 @@ fun PaymentFormContent(
                 )
             } else {
                 Text(
-                    text = "Send Payment",
+                    text = strings.submit,
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -218,7 +220,7 @@ fun PaymentFormContent(
             enabled = !isLoading
         ) {
             Text(
-                text = "Cancel",
+                text = strings.cancel,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
