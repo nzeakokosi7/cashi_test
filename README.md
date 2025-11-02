@@ -12,6 +12,25 @@ Cashi is a fintech payment application built with Kotlin Multiplatform, featurin
 - **Cross-platform business logic** shared between Android, iOS, and Server
 - **Comprehensive testing** including unit tests, BDD scenarios, and load testing
 
+## 🎥 Demo Videos
+
+Watch comprehensive demos of the project:
+
+1. **[Cashi Challenge Demo Part 1 | Payments & Project Structure Demo](https://www.loom.com/share/3f87027f9988489ea3a137d8d8220168)**
+   - Application walkthrough and payment flow
+   - Project architecture and structure
+   - Firebase integration demonstration
+
+2. **[Cashi Challenge Demo Part 2 | Unit & BDD Testing Demo](https://www.loom.com/share/e4473fd512a24e59b76f28f65dd4016b)**
+   - Unit testing with MockK
+   - BDD scenarios with Cucumber
+   - Test coverage and reporting
+
+3. **[Cashi Challenge Demo Final Part | Appium & JMeter Load Tests](https://www.loom.com/share/5deb794f89694697893174b720629452)**
+   - UI automation with Appium
+   - Load testing with JMeter
+   - Performance analysis
+
 ## ⚠️ Security Warning - For Demonstration Only
 
 **IMPORTANT**: This application is configured for local development and demonstration purposes only.
