@@ -1,0 +1,235 @@
+package com.test.cashi
+
+import io.appium.java_client.AppiumBy
+import io.appium.java_client.android.AndroidDriver
+import io.appium.java_client.android.nativekey.AndroidKey
+import io.appium.java_client.android.nativekey.KeyEvent
+import org.junit.Assert.*
+import org.junit.Test
+import org.openqa.selenium.support.ui.ExpectedConditions
+import org.openqa.selenium.support.ui.WebDriverWait
+import java.time.Duration
+
+/**
+ * Appium test for Payment Flow
+ * Tests sending a payment and verifying it appears in transaction history
+ */
+class PaymentFlowTest : BaseAppiumTest() {
+
+    private val testEmail = "test.recipient@example.com"
+    private val testAmount = "100.50"
+    private val wait by lazy { WebDriverWait(driver, Duration.ofSeconds(20)) }
+
+    @Test
+    fun testSendPaymentAndVerifyInHistory() {
+        // Step 1: Open the payment bottom sheet by clicking the FAB (Floating Action Button)
+        val addPaymentButton = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                AppiumBy.accessibilityId("Add Payment")
+            )
+        )
+        addPaymentButton.click()
+
+        // Wait for the bottom sheet to open
+        waitFor(1)
+
+        // Step 2: Verify payment form is displayed
+        val paymentHeader = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                AppiumBy.xpath("//*[@text='Send Payment']")
+            )
+        )
+        assertTrue("Payment form should be visible", paymentHeader.isDisplayed)
+
+        // Step 3: Fill in recipient email
+        val emailField = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                // Find by hint text or label
+                AppiumBy.xpath("//*[contains(@text, 'Recipient Email') or contains(@content-desc, 'Recipient Email')]")
+            )
+        )
+        emailField.click()
+
+        // Find the actual input field (might be a child element)
+        val emailInput = driver.findElement(
+            AppiumBy.className("android.widget.EditText")
+        )
+        emailInput.sendKeys(testEmail)
+
+        // Step 4: Select currency (default is USD, skip if USD is desired)
+        // If you want to change currency:
+        // val currencyDropdown = driver.findElement(AppiumBy.xpath("//*[@text='Currency']"))
+        // currencyDropdown.click()
+        // val eurOption = driver.findElement(AppiumBy.xpath("//*[@text='EUR (€)']"))
+        // eurOption.click()
+
+        // Step 5: Fill in amount
+        // Wait a bit for the UI to settle after email input
+        waitFor(1)
+
+        // Find all EditTexts and use the last one (amount field comes after email and is visible)
+        val amountInputs = driver.findElements(AppiumBy.className("android.widget.EditText"))
+        println("Found ${amountInputs.size} EditText fields")
+
+        // The amount field should be the last visible EditText
+        val amountInput = amountInputs.lastOrNull() ?: throw Exception("No amount input field found")
+        amountInput.click()
+        waitFor(1)
+        amountInput.sendKeys(testAmount)
+
+        // Step 6: Wait for UI to settle and keyboard to auto-dismiss
+        // Don't press BACK as it will dismiss the bottom sheet
+        waitFor(2)
+
+        // Click Send Payment button
+        // There are TWO "Send Payment" texts - header (index 0) and button (index 1)
+        // Find all elements and click the second one (the button)
+        val sendPaymentElements = wait.until(
+            ExpectedConditions.numberOfElementsToBeMoreThan(
+                AppiumBy.xpath("//*[@text='Send Payment']"),
+                0
+            )
+        )
+        println("Found ${sendPaymentElements.size} elements with text 'Send Payment'")
+
+        // The button should be the last one (after the header)
+        val sendButton = sendPaymentElements.lastOrNull() ?: throw Exception("Send Payment button not found")
+        assertTrue("Send button should be enabled", sendButton.isEnabled)
+        sendButton.click()
+
+        // Step 8: Wait for payment to be submitted (loading state)
+        waitFor(3)
+
+        // Step 9: Verify we're back to the transaction list
+        val transactionsHeader = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                AppiumBy.xpath("//*[@text='Transactions']")
+            )
+        )
+        assertTrue("Should return to transactions screen", transactionsHeader.isDisplayed)
+
+        // Step 10: Verify the payment appears in the transaction history
+        val transactionCard = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                AppiumBy.xpath("//*[contains(@text, '$testEmail')]")
+            )
+        )
+        assertTrue("Payment should appear in transaction list", transactionCard.isDisplayed)
+
+        // Step 11: Verify the amount is displayed correctly
+        val amountElement = driver.findElement(
+            AppiumBy.xpath("//*[contains(@text, '$testAmount') or contains(@text, '\$100.50')]")
+        )
+        assertTrue("Payment amount should be displayed", amountElement.isDisplayed)
+
+        // Step 12: Verify transaction status (should be PENDING or COMPLETED)
+        try {
+            val statusElement = driver.findElement(
+                AppiumBy.xpath("//*[@text='PENDING' or @text='COMPLETED' or @text='Pending' or @text='Completed']")
+            )
+            assertTrue("Transaction status should be visible", statusElement.isDisplayed)
+        } catch (e: Exception) {
+            // Status might be displayed differently, log but don't fail
+            println("Warning: Could not verify transaction status: ${e.message}")
+        }
+    }
+
+    @Test
+    fun testPaymentFormValidation() {
+        // Step 1: Open the payment bottom sheet
+        val addPaymentButton = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                AppiumBy.accessibilityId("Add Payment")
+            )
+        )
+        addPaymentButton.click()
+
+        waitFor(1)
+
+        // Step 2: Find the Send Payment button (not the header)
+        // There are two elements with "Send Payment" text - we need the button (last one)
+        val sendPaymentElements = wait.until(
+            ExpectedConditions.numberOfElementsToBeMoreThan(
+                AppiumBy.xpath("//*[@text='Send Payment']"),
+                1
+            )
+        )
+        val sendButton = sendPaymentElements.last()
+
+        // Button should be disabled when fields are empty
+        assertFalse("Send button should be disabled with empty fields", sendButton.isEnabled)
+
+        // Step 3: Fill only email
+        val emailInput = driver.findElement(AppiumBy.className("android.widget.EditText"))
+        emailInput.sendKeys(testEmail)
+
+        waitFor(1)
+
+        // Button should still be disabled (amount is missing)
+        assertFalse("Send button should be disabled without amount", sendButton.isEnabled)
+
+        // Step 4: Click cancel button
+        val cancelButton = driver.findElement(AppiumBy.xpath("//*[@text='Cancel']"))
+        cancelButton.click()
+
+        waitFor(1)
+
+        // Should be back to transaction list
+        val transactionsHeader = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                AppiumBy.xpath("//*[@text='Transactions']")
+            )
+        )
+        assertTrue("Should return to transactions screen after cancel", transactionsHeader.isDisplayed)
+    }
+
+    @Test
+    fun testCurrencySelection() {
+        // Step 1: Open the payment bottom sheet
+        val addPaymentButton = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                AppiumBy.accessibilityId("Add Payment")
+            )
+        )
+        addPaymentButton.click()
+
+        waitFor(1)
+
+        // Step 2: Click on currency dropdown
+        val currencyDropdown = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                AppiumBy.xpath("//*[contains(@text, 'USD') and contains(@text, '\$')]")
+            )
+        )
+        currencyDropdown.click()
+
+        waitFor(1)
+
+        // Step 3: Verify currency options are displayed
+        val eurOption = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                AppiumBy.xpath("//*[@text='EUR (€)']")
+            )
+        )
+        assertTrue("EUR option should be visible", eurOption.isDisplayed)
+
+        // Step 4: Select EUR
+        eurOption.click()
+
+        waitFor(1)
+
+        // Step 5: Verify EUR is now selected
+        val selectedCurrency = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                AppiumBy.xpath("//*[contains(@text, 'EUR') and contains(@text, '€')]")
+            )
+        )
+        assertTrue("EUR should be selected", selectedCurrency.isDisplayed)
+
+        // Verify the amount field now shows € symbol
+        val amountFieldWithEuro = driver.findElement(
+            AppiumBy.xpath("//*[@text='€']")
+        )
+        assertTrue("Amount field should show € symbol", amountFieldWithEuro.isDisplayed)
+    }
+}

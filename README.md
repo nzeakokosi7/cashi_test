@@ -61,6 +61,7 @@ This configuration exists solely to simplify the demonstration of the app's arch
 - Cucumber (Kotlin) for BDD tests
 - MockK for mocking
 - JMeter for load testing
+- Appium for UI automation testing
 
 ## Project Structure
 
@@ -326,6 +327,61 @@ open reports/index.html
 - Throughput: ~50-100 requests/second
 - Average Response Time: < 500ms
 - Error Rate: < 1%
+
+### UI Automation Testing (Appium)
+
+Test the complete payment flow with automated UI tests:
+
+**Prerequisites:**
+1. Install Appium Server:
+   ```bash
+   npm install -g appium
+   appium driver install uiautomator2
+   ```
+2. Start an Android emulator or connect a physical device
+3. Ensure the app is installed on the device
+
+**Running Appium Tests:**
+
+**Option A: Using the Helper Script (Recommended)**
+```bash
+# Run all Appium tests (automatically handles Appium server, app installation, etc.)
+./run-appium-tests.sh
+
+# Run a specific test class
+./run-appium-tests.sh "com.test.cashi.PaymentFlowTest"
+
+# Run a specific test method
+./run-appium-tests.sh "com.test.cashi.PaymentFlowTest.testSendPaymentAndVerifyInHistory"
+```
+
+**Option B: Manual Setup**
+```bash
+# 1. Start Appium server in a separate terminal
+appium
+
+# 2. Install the app
+./gradlew :composeApp:installDebug
+
+# 3. Run the tests
+./gradlew :appium-tests:test
+```
+
+**Test Coverage:**
+- `testSendPaymentAndVerifyInHistory()` - Complete payment flow:
+  - Opens payment form
+  - Fills in recipient email and amount
+  - Submits payment
+  - Verifies transaction appears in history
+- `testPaymentFormValidation()` - Form validation:
+  - Tests required field validation
+  - Tests cancel button functionality
+- `testCurrencySelection()` - Currency dropdown:
+  - Tests currency selection (USD/EUR)
+  - Validates currency symbol updates
+
+**Detailed Documentation:**
+See [APPIUM_TESTING.md](composeApp/APPIUM_TESTING.md) for comprehensive setup and troubleshooting guide.
 
 ## Running All Tests
 
