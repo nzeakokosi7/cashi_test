@@ -34,11 +34,10 @@ abstract class BaseAppiumTest {
             // Device configuration (update these based on your test device/emulator)
             setDeviceName("Android Emulator")
 
-            // For running on real device, you can set UDID
-            // setUdid("your-device-udid")
 
-            // If app is already installed, don't reinstall
-            setNoReset(true)
+            // Reset app state for consistent tests, but don't uninstall
+            setNoReset(false)
+            setFullReset(false)
 
             // Wait times
             setNewCommandTimeout(Duration.ofSeconds(300))
@@ -68,18 +67,5 @@ abstract class BaseAppiumTest {
      */
     protected fun waitFor(seconds: Long) {
         Thread.sleep(seconds * 1000)
-    }
-
-    /**
-     * Helper method to dump page source for debugging
-     */
-    protected fun dumpPageSource(message: String = "Page Source") {
-        try {
-            println("\n=== $message ===")
-            println(driver.pageSource)
-            println("=================\n")
-        } catch (e: Exception) {
-            println("Failed to dump page source: ${e.message}")
-        }
     }
 }

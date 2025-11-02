@@ -1,9 +1,6 @@
 package com.test.cashi
 
 import io.appium.java_client.AppiumBy
-import io.appium.java_client.android.AndroidDriver
-import io.appium.java_client.android.nativekey.AndroidKey
-import io.appium.java_client.android.nativekey.KeyEvent
 import org.junit.Assert.*
 import org.junit.Test
 import org.openqa.selenium.support.ui.ExpectedConditions
@@ -56,15 +53,6 @@ class PaymentFlowTest : BaseAppiumTest() {
         )
         emailInput.sendKeys(testEmail)
 
-        // Step 4: Select currency (default is USD, skip if USD is desired)
-        // If you want to change currency:
-        // val currencyDropdown = driver.findElement(AppiumBy.xpath("//*[@text='Currency']"))
-        // currencyDropdown.click()
-        // val eurOption = driver.findElement(AppiumBy.xpath("//*[@text='EUR (€)']"))
-        // eurOption.click()
-
-        // Step 5: Fill in amount
-        // Wait a bit for the UI to settle after email input
         waitFor(1)
 
         // Find all EditTexts and use the last one (amount field comes after email and is visible)
@@ -129,8 +117,6 @@ class PaymentFlowTest : BaseAppiumTest() {
 
     @Test
     fun testPaymentFormValidation() {
-        // Dump page source for debugging
-        dumpPageSource("Initial Page Load")
 
         // Step 1: Open the payment bottom sheet
         val addPaymentButton = wait.until(
