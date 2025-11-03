@@ -31,6 +31,7 @@ import com.test.cashi.domain.model.TransactionStatus
 import com.test.cashi.ui.components.EmptyStateView
 import com.test.cashi.ui.components.LoadingStateView
 import com.test.cashi.ui.components.TransactionCard
+import com.test.cashi.ui.localization.LocalizationProvider
 import com.test.cashi.ui.localization.LocalLocaleManager
 import com.test.cashi.ui.localization.LocalStrings
 import com.test.cashi.ui.theme.CashiTheme
@@ -133,11 +134,13 @@ fun TransactionListScreen(
 @Preview
 @Composable
 fun TransactionListScreenEmptyPreview() {
-    CashiTheme {
-        TransactionListScreen(
-            transactions = emptyList(),
-            onAddPaymentClick = {}
-        )
+    LocalizationProvider {
+        CashiTheme {
+            TransactionListScreen(
+                transactions = emptyList(),
+                onAddPaymentClick = {}
+            )
+        }
     }
 }
 
@@ -145,36 +148,38 @@ fun TransactionListScreenEmptyPreview() {
 @Preview
 @Composable
 fun TransactionListScreenWithTransactionsPreview() {
-    CashiTheme {
-        TransactionListScreen(
-            transactions = listOf(
-                Payment(
-                    id = "1",
-                    recipientEmail = "john.doe@example.com",
-                    amount = 150.00,
-                    currency = Currency.USD,
-                    timestamp = Clock.System.now().toEpochMilliseconds(),
-                    status = TransactionStatus.COMPLETED
+    LocalizationProvider {
+        CashiTheme {
+            TransactionListScreen(
+                transactions = listOf(
+                    Payment(
+                        id = "1",
+                        recipientEmail = "john.doe@example.com",
+                        amount = 150.00,
+                        currency = Currency.USD,
+                        timestamp = Clock.System.now().toEpochMilliseconds(),
+                        status = TransactionStatus.COMPLETED
+                    ),
+                    Payment(
+                        id = "2",
+                        recipientEmail = "jane.smith@company.com",
+                        amount = 250.50,
+                        currency = Currency.EUR,
+                        timestamp = Clock.System.now().toEpochMilliseconds() - 3600000,
+                        status = TransactionStatus.PENDING
+                    ),
+                    Payment(
+                        id = "3",
+                        recipientEmail = "failed.payment@test.com",
+                        amount = 99.99,
+                        currency = Currency.USD,
+                        timestamp = Clock.System.now().toEpochMilliseconds() - 7200000,
+                        status = TransactionStatus.FAILED
+                    )
                 ),
-                Payment(
-                    id = "2",
-                    recipientEmail = "jane.smith@company.com",
-                    amount = 250.50,
-                    currency = Currency.EUR,
-                    timestamp = Clock.System.now().toEpochMilliseconds() - 3600000,
-                    status = TransactionStatus.PENDING
-                ),
-                Payment(
-                    id = "3",
-                    recipientEmail = "failed.payment@test.com",
-                    amount = 99.99,
-                    currency = Currency.USD,
-                    timestamp = Clock.System.now().toEpochMilliseconds() - 7200000,
-                    status = TransactionStatus.FAILED
-                )
-            ),
-            onAddPaymentClick = {}
-        )
+                onAddPaymentClick = {}
+            )
+        }
     }
 }
 
@@ -182,24 +187,26 @@ fun TransactionListScreenWithTransactionsPreview() {
 @Preview
 @Composable
 fun TransactionListScreenManyTransactionsPreview() {
-    CashiTheme {
-        TransactionListScreen(
-            transactions = List(10) { index ->
-                Payment(
-                    id = index.toString(),
-                    recipientEmail = "user$index@example.com",
-                    amount = (50 + index * 25).toDouble(),
-                    currency = if (index % 2 == 0) Currency.USD else Currency.EUR,
-                    timestamp = Clock.System.now().toEpochMilliseconds() - (index * 3600000L),
-                    status = when (index % 3) {
-                        0 -> TransactionStatus.COMPLETED
-                        1 -> TransactionStatus.PENDING
-                        else -> TransactionStatus.FAILED
-                    }
-                )
-            },
-            onAddPaymentClick = {}
-        )
+    LocalizationProvider {
+        CashiTheme {
+            TransactionListScreen(
+                transactions = List(10) { index ->
+                    Payment(
+                        id = index.toString(),
+                        recipientEmail = "user$index@example.com",
+                        amount = (50 + index * 25).toDouble(),
+                        currency = if (index % 2 == 0) Currency.USD else Currency.EUR,
+                        timestamp = Clock.System.now().toEpochMilliseconds() - (index * 3600000L),
+                        status = when (index % 3) {
+                            0 -> TransactionStatus.COMPLETED
+                            1 -> TransactionStatus.PENDING
+                            else -> TransactionStatus.FAILED
+                        }
+                    )
+                },
+                onAddPaymentClick = {}
+            )
+        }
     }
 }
 
@@ -207,12 +214,14 @@ fun TransactionListScreenManyTransactionsPreview() {
 @Preview
 @Composable
 fun TransactionListScreenLoadingPreview() {
-    CashiTheme {
-        TransactionListScreen(
-            transactions = emptyList(),
-            isLoading = true,
-            onAddPaymentClick = {}
-        )
+    LocalizationProvider {
+        CashiTheme {
+            TransactionListScreen(
+                transactions = emptyList(),
+                isLoading = true,
+                onAddPaymentClick = {}
+            )
+        }
     }
 }
 
@@ -220,27 +229,29 @@ fun TransactionListScreenLoadingPreview() {
 @Preview
 @Composable
 fun TransactionListScreenDarkPreview() {
-    CashiTheme(darkTheme = true) {
-        TransactionListScreen(
-            transactions = listOf(
-                Payment(
-                    id = "1",
-                    recipientEmail = "darkmode@example.com",
-                    amount = 1250.00,
-                    currency = Currency.EUR,
-                    timestamp = Clock.System.now().toEpochMilliseconds(),
-                    status = TransactionStatus.COMPLETED
+    LocalizationProvider {
+        CashiTheme(darkTheme = true) {
+            TransactionListScreen(
+                transactions = listOf(
+                    Payment(
+                        id = "1",
+                        recipientEmail = "darkmode@example.com",
+                        amount = 1250.00,
+                        currency = Currency.EUR,
+                        timestamp = Clock.System.now().toEpochMilliseconds(),
+                        status = TransactionStatus.COMPLETED
+                    ),
+                    Payment(
+                        id = "2",
+                        recipientEmail = "pending@test.com",
+                        amount = 75.50,
+                        currency = Currency.USD,
+                        timestamp = Clock.System.now().toEpochMilliseconds() - 3600000,
+                        status = TransactionStatus.PENDING
+                    )
                 ),
-                Payment(
-                    id = "2",
-                    recipientEmail = "pending@test.com",
-                    amount = 75.50,
-                    currency = Currency.USD,
-                    timestamp = Clock.System.now().toEpochMilliseconds() - 3600000,
-                    status = TransactionStatus.PENDING
-                )
-            ),
-            onAddPaymentClick = {}
-        )
+                onAddPaymentClick = {}
+            )
+        }
     }
 }
